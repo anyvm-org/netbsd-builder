@@ -12,9 +12,10 @@ cp /etc/rc.conf /etc/rc.conf.bak.fastboot
 cp /etc/dhcpcd.conf /etc/dhcpcd.conf.bak.fastboot 2>/dev/null
 
 # rc.conf (with mandatory rc_configured=YES)
+#hostname="netbsd"
 cat <<EOF >/etc/rc.conf
 rc_configured=YES
-hostname="netbsd"
+
 
 sshd=YES
 sshd_flags="-o UseDNS=no -o PermitRootLogin=yes"
