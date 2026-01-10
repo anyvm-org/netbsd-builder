@@ -8,6 +8,26 @@ Latest: v2.0.3
 The image builder for `netbsd`
 
 
+All the supported releases are here:
+
+
+
+| Release | x86_64(amd64)  | aarch64(arm64) |
+|---------|---------|---------|
+|  10.1   |  ✅     |   ✅   |
+|  10.0   |  ✅     |   ✅   |
+|  9.4    |  ✅     |   ❌   |
+|  9.3    |  ✅     |   ❌   |
+|  9.2    |  ✅     |   ❌   |
+|  9.1    |  ✅     |   ❌   |
+|  9.0    |  ✅     |   ❌   |
+
+
+
+
+
+
+
 How to use:
 
 1. Use the [manual.yml](.github/workflows/manual.yml) to build manually.
