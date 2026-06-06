@@ -31,7 +31,13 @@ Bootblocks | enter
 
 Installation without X11 | down ; enter
 
-Install from | string c ; enter
+# Distribution medium menu: cursor defaults to "a: CD-ROM" -- just press
+# enter to install sets straight from the boot ISO. Use the menu header
+# "Install from" as the OCR anchor (the literal "FTP" anchor that
+# previous releases used got mis-OCR'd as "FIP" and never matched).
+# All network / hostname / sshd config below happens in the post-install
+# "Configure additional items" sub-menu, NOT during the install itself.
+Install from | enter
 
 
 sysinst will give you the opportunity  | enter
@@ -40,7 +46,7 @@ sysinst will give you the opportunity  | enter
 Changing local password for root | enter
 
 
-Configure the additional |  string a ; enter 
+Configure the additional |  string a ; enter
 
 
 
@@ -58,14 +64,12 @@ Perform autoconf | enter ; sleep 20 ; string anyvm.org ; enter ; sleep 3; enter;
 
 Is the network information you entered accurate | enter
 
-#Enable sshd 
-Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter 
+#Enable sshd
+Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter
 
 
 At a minimum | enter
 
 
-#Reboot the computer 
+#Reboot the computer
 Reboot the computer | string d ; enter; sleep 20
-
-

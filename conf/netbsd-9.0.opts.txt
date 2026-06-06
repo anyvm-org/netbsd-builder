@@ -31,6 +31,8 @@ Bootblocks | enter
 
 Installation without X11 | down ; enter
 
+# Distribution medium: press 'c' (FTP hotkey) so OCR misreading "FTP" -> "FIP"
+# doesn't break the menu choice.
 Install from | string c ; enter
 
 
@@ -38,7 +40,7 @@ sysinst will give you the opportunity  | enter
 
 
 
-Configure the additional |  string a ; enter 
+Configure the additional |  string a ; enter
 
 
 
@@ -54,14 +56,14 @@ Perform autoconf | enter ; sleep 20 ; string anyvm.org ; enter ; sleep 3; enter;
 
 
 
-#Enable sshd 
-Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter 
+Is the network information you entered accurate | enter
+
+#Enable sshd
+Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter
 
 
 At a minimum | enter
 
 
-#Reboot the computer 
+#Reboot the computer
 Reboot the computer | string d ; enter; sleep 20
-
-
