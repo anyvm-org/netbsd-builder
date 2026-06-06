@@ -41,6 +41,6 @@ How to build:
 
     Just clone the repo. and run:
     ```bash
-    bash build.sh conf/netbsd-9.4.conf
+    python3 build.py conf/netbsd-9.4.conf
     ```
    
