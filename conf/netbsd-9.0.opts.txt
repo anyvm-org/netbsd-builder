@@ -31,9 +31,7 @@ Bootblocks | enter
 
 Installation without X11 | down ; enter
 
-# Distribution medium: press 'c' (FTP hotkey) so OCR misreading "FTP" -> "FIP"
-# doesn't break the menu choice.
-Install from | string c ; enter
+Install from |  enter
 
 
 sysinst will give you the opportunity  | enter
