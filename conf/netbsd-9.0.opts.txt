@@ -54,7 +54,11 @@ Perform autoconf | enter ; sleep 20 ; string anyvm.org ; enter ; sleep 3; enter;
 
 
 
-Is the network information you entered accurate | enter
+# "Is the network information you entered accurate?" dialog auto-confirmed
+# by the trailing `enter` in the autoconf line above (sysinst 9.x pops it
+# right after the empty-name-server enter). Don't re-fire enter here: when
+# the dialog is gone, the main menu is on screen and `enter` would reopen
+# "a: Configure network" -> stuck at "Which network device".
 
 #Enable sshd
 Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter
