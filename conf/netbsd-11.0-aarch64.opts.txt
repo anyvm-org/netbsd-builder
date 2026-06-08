@@ -1,0 +1,78 @@
+#
+# wait screen text  | press key
+# evbarm-aarch64 sysinst answer file. Derived from the amd64 flow by hand-
+# driving the live installer; the aarch64 differences from amd64 are:
+#   * no "Keyboard type" menu (amd64's "English" step is gone),
+#   * a main-menu step selects "Install NetBSD to hard disk",
+#   * GPT instead of MBR (no MBR geometry warning),
+#   * no "Bootblocks" menu (UEFI boot, not MBR bootblocks),
+#   * the disk is ld4 (virtio-blk), but "Available disks" still anchors it.
+
+
+
+Installation | enter
+
+# Main menu (a: Install NetBSD to hard disk / b: Upgrade ...). The cursor
+# defaults to "Install", so just press enter; anchor on "Upgrade NetBSD on a
+# hard disk" which only appears on this menu.
+Upgrade NetBSD on a hard disk | enter
+
+After you enter the partition | down ; enter
+
+Available disks | enter
+
+# aarch64 boots via UEFI, so pick GPT (cursor default a: GPT). Replaces amd64's
+# "MBR" + "You should only change the geometry" steps.
+partitioning scheme | enter
+
+Use default partition sizes | down ; enter
+
+
+Change input | enter
+
+
+we are now ready to install | down ; enter
+
+
+# No "Bootblocks" screen on aarch64 -- newfs runs, then the distribution menu
+# appears directly. Select "b: Installation without X11".
+Installation without X11 | down ; enter
+
+Install from | enter
+
+
+sysinst will give you the opportunity  | enter
+
+
+Changing local password for root | enter
+
+
+Configure the additional |  string a ; enter
+
+
+
+# OCR on the virtio-gpu framebuffer misreads the capital "W" in "Which" as "H"
+# ("Hhich"), so anchor on the text after it.
+network device would you like to use | enter
+
+
+
+To be able to use the network  | enter
+
+
+
+Perform autoconf | enter ; sleep 20 ; string anyvm.org ; enter ; sleep 3; enter; sleep 3; enter| 10
+
+
+
+Is the network information you entered accurate | enter
+
+#Enable sshd
+Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter
+
+
+At a minimum | enter
+
+
+#Reboot the computer
+Reboot the computer | string d ; enter; sleep 20
