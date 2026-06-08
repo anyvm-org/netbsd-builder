@@ -38,7 +38,13 @@ we are now ready to install | down ; enter
 # appears directly. Select "b: Installation without X11".
 Installation without X11 | down ; enter
 
-Install from | enter
+# CI tesseract misreads "Install from" as "Install fron" (m->n), so the
+# "Install from" anchor never matched and the install hung here ~22 min until
+# canceled. Anchor on the screen header "disk is now ready" instead: m/c/g-free
+# (the OCR-fragile letters) and unique to this set-source screen -- step 9's
+# set-group screen has a different header ("The NetBSD distribution is broken
+# into..."). enter still accepts the default >a: CD-ROM / DVD / install image.
+disk is now ready | enter
 
 
 sysinst will give you the opportunity  | enter
@@ -65,14 +71,21 @@ Perform autoconf | enter ; sleep 20 ; string anyvm.org ; enter ; sleep 3; enter;
 
 
 
-Is the network information you entered accurate | enter
+# "information" has an 'm' CI OCR turns to 'n'; anchor on the m-free
+# "values you entered" (from "The following are the values you entered.").
+values you entered | enter
 
 #Enable sshd
 Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter
 
 
-At a minimum | enter
+# "minimum" (three m's) is OCR-fragile; anchor on the m-free "you should edit"
+# (from "At a minimum, you should edit /etc/rc.conf to match your needs").
+you should edit | enter
 
 
 #Reboot the computer
-Reboot the computer | string d ; enter; sleep 20
+# "computer" has an 'm'; anchor on the m-free "install additional sets" (from
+# the main-menu line "Re-install sets or install additional sets"). The key 'd'
+# still selects "Reboot the computer" on that menu.
+install additional sets | string d ; enter; sleep 20
