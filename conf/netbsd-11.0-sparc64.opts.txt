@@ -1,0 +1,125 @@
+#
+# wait screen text                         | keys
+#
+# sparc64 sysinst answer file, driven over the SERIAL console (not VNC/OCR), so
+# the anchors are exact menu text -- no OCR-misread workarounds needed. Derived
+# by hand-driving sysinst once (qemu-system-sparc64 sun4u). Differs from the
+# amd64/aarch64 flow in three ways:
+#   * a "Terminal type" prompt comes first (serial install only),
+#   * NO partition-scheme menu (sparc64 uses a Sun disklabel implicitly),
+#   * an extra entropy screen appears because sun4u has no RNG device (the
+#     build.py sparc64 branch omits virtio-rng), handled by "Not now, continue".
+# In every sysinst menu, typing the reference letter moves the cursor to that
+# item and ENTER activates it -- so a toggle/select is "string <letter> ; enter".
+#
+
+# Serial install asks for the terminal type before starting curses (vt220 ok).
+Terminal type | enter | 240
+
+# Language menu (cursor on English) and the welcome -> main menu.
+messages in English | enter | 120
+
+# Main menu: cursor defaults to "a: Install NetBSD to hard disk"; anchor on the
+# unique "b: Upgrade ..." line and just press enter to take Install.
+Upgrade NetBSD on a hard disk | enter | 120
+
+# "This will change information on your hard disk ... Shall we continue?"
+# (Yes/No, cursor on No) -> pick Yes.
+Shall we continue | string b ; enter | 60
+
+# "On which disk do you want to install" -- only wd0 (the IDE disk); take it.
+which disk do you want to install | enter | 60
+
+# Partition menu (no GPT/MBR step on sparc64): take "b: Use default partition
+# sizes". This lays out a:/ b:swap c:wholedisk, but 11.0 RC4 defaults the root
+# to FFSv2ea (FFS + inline extended attributes), and the sparc64 OpenFirmware
+# FCode bootblock (bootblk.fth) CANNOT read FFSv2ea -- it loads, prints its
+# version, then hangs before ofwboot, so the installed disk never cold-boots.
+# So we must change the root FS type back to plain FFSv2 below.
+What would you like to do | string b ; enter | 60
+
+# Disklabel review. Default cursor is on "x: Partition sizes ok"; move it to
+# partition "a" (the root) and open that partition's field editor.
+Partition sizes ok | string a | 30
+chance to change them | enter | 30
+
+# Field editor opens with the cursor on "a: type : FFSv2ea"; enter opens the
+# filesystem-type chooser.
+Select the field you wish to change | enter | 30
+
+# Type chooser (cursor on FFSv2ea) -> pick "b: FFSv2" (no extended attributes,
+# bootable by the sparc64 bootblock).
+Select the type | string b ; enter | 30
+
+# Back in the field editor (now "type : FFSv2"); page down to reveal the exit
+# row, then accept with "x: OK".
+Restore original values | string > | 20
+Delete partition | string x ; enter | 20
+
+# Back at the disklabel review with the cursor on partition a; move to and
+# accept "x: Partition sizes ok". Root is now FFSv2.
+Partition sizes ok | string x ; enter | 60
+
+# "Ok, we are now ready to install NetBSD on your hard disk (wd0) ... Shall we
+# continue?" (Yes/No, cursor on No) -> Yes. Writes the disklabel, newfs's, and
+# installs the OpenFirmware bootblock (ofwboot) onto wd0.
+ready to install NetBSD on your hard disk | string b ; enter | 60
+
+# Distribution set group: "b: Installation without X11" (server image, no X).
+Installation without X11 | string b ; enter | 60
+
+# Install source: cursor on "a: CD-ROM / DVD"; enter starts extraction from the
+# DVD. Anchor on the screen header "Your disk is now ready".
+Your disk is now ready | enter | 60
+
+# Extraction of all 14 sets from the DVD is slow under TCG -- wait (up to 30
+# min) for the "extraction ... is complete ... Hit enter to continue" screen.
+sysinst will give you the opportunity | enter | 1800
+
+# Root password: leave empty (the console enablessh branch sets SSH up after
+# install). "New password:" -> just enter.
+Changing local password for root | enter | 60
+
+# sun4u has no RNG, so sysinst warns the system "seems to lack a
+# cryptographically strong" PRNG and offers to seed entropy. Skip it: "x: Not
+# now, continue!" (ssh-keygen uses non-blocking urandom on first boot anyway).
+cryptographically strong | string x ; enter | 60
+
+# Post-install config menu. First select "a: Configure network".
+Finished configuring | string a ; enter | 60
+
+# "Available interfaces" -> hme0 (the only NIC).
+Available interfaces | enter | 60
+
+# "Network media type (empty to autoconfigure) [autoselect]:" -> enter.
+To be able to use the network | enter | 60
+
+# "Perform autoconfiguration?" (DHCP, cursor on Yes) -> enter.
+Perform autoconf | enter | 60
+
+# DHCP succeeds (slirp hands out 192.168.122.254). Set the host name.
+Your host name | string anyvm.org ; enter | 90
+
+# "Your DNS domain:" -> leave empty.
+Your DNS domain | enter | 30
+
+# Network summary "...the values you entered ... Are they OK?" (cursor Yes).
+values you entered | enter | 30
+
+# "...do you want it installed in /etc?" (cursor Yes) -- writes the DHCP config
+# into the installed system so it has networking on boot.
+installed in /etc | enter | 30
+
+# Back at the config menu: toggle "g: Enable sshd (Secure Shell daemon)" to YES.
+Enable sshd | string g ; enter | 30
+
+# Done configuring: "x: Finished configuring".
+Finished configuring | string x ; enter | 30
+
+# "The installation of NetBSD-11.0_RC4 is now complete ... At a minimum, you
+# should edit /etc/rc.conf ... Hit enter to continue" -> back to main menu.
+you should edit | enter | 60
+
+# Main menu: "d: Reboot the computer". build.py then force-stops QEMU and
+# relaunches from the disk (without the CD) for the real cold boot.
+Reboot the computer | string d ; enter ; sleep 20 | 30
