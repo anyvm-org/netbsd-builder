@@ -95,7 +95,10 @@ done
 sleep 2
 
 echo "pkgfetch phase 2: pkg_add from tmpfs (network idle)"
-PKG_PATH="$D;$P" /usr/sbin/pkg_add $ANYVM_PKGS
+# -U (update if already installed) makes a re-run idempotent: build.py
+# retries this whole script once after a guest reroll, and a partial first
+# attempt must not fail the retry with "already recorded as installed".
+PKG_PATH="$D;$P" /usr/sbin/pkg_add -U $ANYVM_PKGS
 
 cd /
 umount "$D"
