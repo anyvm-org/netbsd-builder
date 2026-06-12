@@ -92,3 +92,19 @@ jobs:
           netbsd-${{ matrix.os }}.qemu
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
