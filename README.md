@@ -17,11 +17,11 @@ All the supported releases are here:
 |  11.0   |  ✅ (rsync,scp,sshfs,nfs)     |   ✅ (rsync,scp,sshfs,nfs)   |   ✅ (rsync,scp,sshfs,nfs)   |   ✅ (scp,sshfs,nfs)   |
 |  10.1   |  ✅ (rsync,scp,sshfs,nfs)     |   ✅ (rsync,scp,sshfs,nfs)   |   —   |   ✅ (scp,sshfs,nfs)   |
 |  10.0   |  ✅ (rsync,scp,sshfs,nfs)     |   ✅ (rsync,scp,sshfs,nfs)   |   —   |   ✅ (scp,sshfs,nfs)   |
-|  9.4    |  ✅ (rsync,scp,sshfs,nfs)     |   —   |   —   |   —   |
-|  9.3    |  ✅ (rsync,scp,sshfs,nfs)     |   —   |   —   |   —   |
-|  9.2    |  ✅ (rsync,scp,sshfs,nfs)     |   —   |   —   |   —   |
-|  9.1    |  ✅ (rsync,scp,sshfs,nfs)     |   —   |   —   |   —   |
-|  9.0    |  ✅ (rsync,scp,sshfs,nfs)     |   —   |   —   |   —   |
+|  9.4    |  ✅ (rsync,scp,sshfs,nfs)     |   ✅ (rsync,scp,sshfs,nfs)   |   —   |   —   |
+|  9.3    |  ✅ (rsync,scp,sshfs,nfs)     |   ✅ (rsync,scp,sshfs,nfs)   |   —   |   —   |
+|  9.2    |  ✅ (rsync,scp,sshfs,nfs)     |   ✅ (rsync,scp,sshfs,nfs)   |   —   |   —   |
+|  9.1    |  ✅ (rsync,scp,sshfs,nfs)     |   ✅ (rsync,scp,sshfs,nfs)   |   —   |   —   |
+|  9.0    |  ✅ (rsync,scp,sshfs,nfs)     |   ✅ (rsync,scp,sshfs,nfs)   |   —   |   —   |
 
 
 > **Note:** NetBSD sparc64 runs under QEMU `sun4u` (TCG only). Its emulated
