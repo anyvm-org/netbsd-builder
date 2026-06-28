@@ -24,6 +24,12 @@ All the supported releases are here:
 |  9.0    |  ✅ (rsync,scp,sshfs,nfs)     |   —   |   —   |   —   |
 
 
+> **Note:** NetBSD sparc64 runs under QEMU `sun4u` (TCG only). Its emulated
+> CMD646 IDE controller can intermittently wedge ("lost interrupt") under
+> sustained disk+network I/O, so sparc64 is **not fully stable and will
+> occasionally fail to boot**. This is intrinsic to QEMU's sun4u emulation,
+> not the image -- a re-run usually succeeds.
+
 
 
 
