@@ -12,15 +12,16 @@
 |  9.0    |  ✅ (rsync,scp,sshfs,nfs)     |   ✅ (rsync,scp,sshfs,nfs)   |   —   |   —   |
 
 
-> **Note:** NetBSD sparc64 runs under QEMU `sun4u` (TCG only). Since builder
-> v2.1.5 the 10.0 / 10.1 images use a hybrid disk layout -- a tiny boot-only
-> IDE disk plus the whole system on an `mptsas1068` SCSI disk (`sd0`) -- which
-> eliminates the CMD646 IDE "lost interrupt" wedge that used to make sparc64
-> boots intermittently fail; all four sync methods (incl. rsync) are verified
-> by CI on every anyvm push (`testsparc64` in anyvm's netbsd.yml). These
-> releases ship two disk assets: `<image>.qcow2.zst` (root) plus
-> `<image>-boot.qcow2.zst`, both fetched automatically by anyvm. 11.0 still
-> uses the classic single-IDE-disk image, where the wedge can appear under
-> sustained disk+network I/O -- a re-run usually succeeds there.
+> **Note:** NetBSD sparc64 runs under QEMU `sun4u` (TCG only). All releases
+> ship a single-IDE-disk image. The CMD646 IDE "lost interrupt" wedge that
+> used to make sparc64 boots intermittently fail is fixed at its source: the
+> sun4u sabre IRQ-clobber bug present in every upstream QEMU is patched
+> (`files/qemu-sabre-irq-clobber.patch`) in the QEMU the images are built on
+> AND in the QEMU anyvm downloads at run time (netbsd-builder publishes the
+> patched `qemu-10.2.3-sparc64-noble.tar.zst`). On **Linux x86_64** hosts the
+> full sync matrix incl. rsync is CI-green (`testsparc64` in anyvm's
+> netbsd.yml). CAVEAT: macOS / Windows hosts can't run that x86_64 patched
+> tarball, so there sparc64 falls back to the system QEMU and can still wedge
+> under heavy concurrent I/O -- a re-run usually succeeds.
 
 

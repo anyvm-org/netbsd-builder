@@ -1,13 +1,12 @@
-  # Publish the sparc64 hybrid-layout BOOT DISKS as release assets:
-  # <os>-<release>-sparc64-boot.qcow2.zst, one per 10.x sparc64 release.
-  # These are the small IDE disks (sun label + FFS + bootblock + ofwboot +
-  # the ANYVM "root on sd0a" kernel) that the runtime boots from while the
-  # main qcow2 asset -- the actual system -- lives on an mptsas1068 SCSI
-  # disk, bypassing QEMU sun4u's wedge-prone CMD646 IDE. Everything is
-  # assembled from the official NetBSD release sources/sets by
-  # files/build-sparc64-bootdisk.sh (the same script the image build's
-  # hooks/host_beforeBuild.sh runs, so what ships here is exactly what the
-  # image build verified); no prebuilt binaries live in git.
+  # Publish the PATCHED qemu-system-sparc64 as a release asset:
+  # qemu-10.2.3-sparc64-noble.tar.zst. Every upstream QEMU carries the sun4u
+  # sabre IRQ-clobber bug (files/qemu-sabre-irq-clobber.patch); anyvm
+  # downloads this patched build for sparc64 guests on Linux x86_64 hosts so
+  # the cmd646 "lost interrupt" wedge never happens at run time. Assembled
+  # from upstream sources by files/build-qemu-sparc64.sh -- the same script
+  # the image build's hooks/host_beforeBuild.sh runs, so what ships here is
+  # exactly what the images are built and verified on; no prebuilt binaries
+  # live in git, and no sibling builder's assets are referenced.
   # A single job, NOT part of the build matrix: every matrix job uploading
   # the same asset name in parallel would race (GitHub rejects duplicate
   # asset names), and the upload should not depend on any one image build
@@ -19,16 +18,7 @@
     runs-on: ubuntu-24.04
     steps:
     - uses: actions/checkout@v6
-    - name: Build the sparc64 boot disks
-      run: |
-        bash files/build-sparc64-bootdisk.sh 10.0 build
-        bash files/build-sparc64-bootdisk.sh 10.1 build
     - name: Build the patched sparc64 QEMU
-      # PATCH-pinned, not version-pinned: every upstream QEMU has the sun4u
-      # sabre IRQ-clobber bug (files/qemu-sabre-irq-clobber.patch); anyvm
-      # prefers this build for sparc64 guests on Linux x86_64 hosts. Built
-      # here from upstream sources -- self-contained, no other builder's
-      # assets involved.
       run: bash files/build-qemu-sparc64.sh build
     - name: Upload Release Assets
       uses: softprops/action-gh-release@v3
@@ -40,6 +30,4 @@
         # with "GitHub Releases requires a tag".
         tag_name: ${{ github.event.release.tag_name || github.ref_name }}
         files: |
-          build/netbsd-10.0-sparc64-boot.qcow2.zst
-          build/netbsd-10.1-sparc64-boot.qcow2.zst
           build/qemu-10.2.3-sparc64-noble.tar.zst
