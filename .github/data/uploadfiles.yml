@@ -23,6 +23,13 @@
       run: |
         bash files/build-sparc64-bootdisk.sh 10.0 build
         bash files/build-sparc64-bootdisk.sh 10.1 build
+    - name: Build the patched sparc64 QEMU
+      # PATCH-pinned, not version-pinned: every upstream QEMU has the sun4u
+      # sabre IRQ-clobber bug (files/qemu-sabre-irq-clobber.patch); anyvm
+      # prefers this build for sparc64 guests on Linux x86_64 hosts. Built
+      # here from upstream sources -- self-contained, no other builder's
+      # assets involved.
+      run: bash files/build-qemu-sparc64.sh build
     - name: Upload Release Assets
       uses: softprops/action-gh-release@v3
       env:
@@ -35,3 +42,4 @@
         files: |
           build/netbsd-10.0-sparc64-boot.qcow2.zst
           build/netbsd-10.1-sparc64-boot.qcow2.zst
+          build/qemu-10.2.3-sparc64-noble.tar.zst
