@@ -24,7 +24,13 @@ ssh-keygen -t rsa -f ~/.ssh/id_rsa -q -N ""
 echo "StrictHostKeyChecking=accept-new" >>~/.ssh/config
 
 echo "PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/pkg/sbin:/usr/pkg/bin:/usr/local/sbin:/usr/local/bin" >>~/.ssh/environment
-echo "PKG_PATH=http://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/$(uname -p)/$(uname -r|cut -f 1,2 -d.|cut -f 1 -d_)/All/" >>~/.ssh/environment
+# No PKG_PATH here on purpose. pkg_install.conf(5) marks PKG_PATH "(*)", i.e.
+# "overriden by environmental variables of the same name", so a value in
+# ~/.ssh/environment would shadow /etc/pkg_install.conf for every ssh session
+# and there would be no way to fix a stale repo URL short of rebuilding the
+# image. hooks/vm_postBuild.sh writes the search list to /etc/pkg_install.conf
+# instead: pkg_add reads that on every invocation, for ssh commands,
+# interactive logins and cron alike.
 
 chmod -w /etc/ssh/sshd_config
 
