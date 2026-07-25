@@ -31,7 +31,7 @@ Shall we continue | string b ; enter | 60
 which disk do you want to install | enter | 60
 
 # Partition menu (no GPT/MBR step on sparc64): take "b: Use default partition
-# sizes". This lays out a:/ b:swap c:wholedisk, but 11.0 RC6 defaults the root
+# sizes". This lays out a:/ b:swap c:wholedisk, but 11.0 RC7 defaults the root
 # to FFSv2ea (FFS + inline extended attributes), and the sparc64 OpenFirmware
 # FCode bootblock (bootblk.fth) CANNOT read FFSv2ea -- it loads, prints its
 # version, then hangs before ofwboot, so the installed disk never cold-boots.
@@ -116,7 +116,7 @@ Enable sshd | string g ; enter | 30
 # Done configuring: "x: Finished configuring".
 Finished configuring | string x ; enter | 30
 
-# "The installation of NetBSD-11.0_RC6 is now complete ... At a minimum, you
+# "The installation of NetBSD-11.0_RC7 is now complete ... At a minimum, you
 # should edit /etc/rc.conf ... Hit enter to continue" -> back to main menu.
 you should edit | enter | 60
 

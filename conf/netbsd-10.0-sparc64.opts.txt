@@ -5,7 +5,7 @@
 # console (not VNC/OCR), so the anchors are exact menu text. Shared by both
 # 10.0 and 10.1 (identical sysinst flow), like the amd64 netbsd-10.0.opts.txt.
 #
-# Differs from the 11.0 sparc64 answer file in ONE way: 11.0 RC6 defaults the
+# Differs from the 11.0 sparc64 answer file in ONE way: 11.0 RC7 defaults the
 # root FS to FFSv2ea (FFS + inline extended attrs) which the sparc64 bootblock
 # cannot read, so the 11.0 file edits the root type back to FFSv2. The 10.x
 # release still defaults the root to plain FFSv2, so that partition-edit block
