@@ -30,9 +30,11 @@ All the supported releases are here:
 > sun4u sabre IRQ-clobber bug present in every upstream QEMU is patched
 > (`files/qemu-sabre-irq-clobber.patch`) in the QEMU the images are built on
 > AND in the QEMU anyvm downloads at run time (netbsd-builder publishes the
-> patched `qemu-10.2.3-sparc64-noble.tar.zst`). On **Linux x86_64** hosts the
-> full sync matrix incl. rsync is CI-green (`testsparc64` in anyvm's
-> netbsd.yml). CAVEAT: macOS / Windows hosts can't run that x86_64 patched
+> patched `qemu-10.2.3-sparc64-noble.tar.zst`). On **Linux x86_64** hosts every
+> sync method listed above is CI-green (`testsparc64` in anyvm's netbsd.yml).
+> 11.0 has no rsync because pkgsrc ships only a sparc64 rsync linked against
+> 10.0's `libcrypto.so.15`, which will not install on 11.0's newer OpenSSL.
+> CAVEAT: macOS / Windows hosts can't run that x86_64 patched
 > tarball, so there sparc64 falls back to the system QEMU and can still wedge
 > under heavy concurrent I/O -- a re-run usually succeeds.
 
