@@ -3,7 +3,12 @@
 
 
 
-Installation | enter
+# Bound the very first wait: a 9.x kernel can die during ISO boot before
+# sysinst ever paints this screen (seen 2026-07-26: 9.2 on an EPYC runner
+# faulted "prevented execution of 0x0 (SMEP)" mid-boot, and this line's
+# unbounded wait then polled "(no new screen text)" for 2 h until a human
+# cancelled the job).
+Installation | enter | 200
 
 English | enter
 

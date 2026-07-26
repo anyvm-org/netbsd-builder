@@ -1,0 +1,185 @@
+{
+  "os": "netbsd",
+  "releases": [
+    {
+      "tag": "9.0",
+      "release": "9.0",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "9.0-aarch64",
+      "release": "9.0",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "9.1",
+      "release": "9.1",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "9.1-aarch64",
+      "release": "9.1",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "9.2",
+      "release": "9.2",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "9.2-aarch64",
+      "release": "9.2",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "9.3",
+      "release": "9.3",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "9.3-aarch64",
+      "release": "9.3",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "9.4",
+      "release": "9.4",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "9.4-aarch64",
+      "release": "9.4",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "10.0",
+      "release": "10.0",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "10.0-aarch64",
+      "release": "10.0",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "10.0-sparc64",
+      "release": "10.0",
+      "arch": "sparc64",
+      "sync": "scp,sshfs,nfs,rsync",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "10.1",
+      "release": "10.1",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "10.1-aarch64",
+      "release": "10.1",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "10.1-sparc64",
+      "release": "10.1",
+      "arch": "sparc64",
+      "sync": "scp,sshfs,nfs,rsync",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "11.0",
+      "release": "11.0",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "11.0-aarch64",
+      "release": "11.0",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "11.0-riscv64",
+      "release": "11.0",
+      "arch": "riscv64",
+      "sync": "rsync,scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "11.0-sparc64",
+      "release": "11.0",
+      "arch": "sparc64",
+      "sync": "scp,sshfs,nfs",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    }
+  ]
+}
