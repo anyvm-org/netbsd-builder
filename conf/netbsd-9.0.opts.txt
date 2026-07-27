@@ -1,57 +1,68 @@
 #
-# wait screen text  | press key
+# wait screen text  | press key | timeout seconds
+#
+# EVERY line must carry the third (timeout) column. build.py's waitForText()
+# treats an empty timeout as "wait forever", so a single unbounded line turns
+# any guest that dies mid-install into a job that spins "(no new screen text)"
+# until the 6 h CI ceiling or a human kills it. That is not hypothetical: these
+# 9.x/10.x kernels take random fatal page faults on the runners' KVM (2026-07-26
+# a 9.2 hit "prevented execution of 0x0 (SMEP)" and burned 2 h; 2026-07-27 a 9.1
+# dropped into DDB at "Stopped in pid 1.1 (init)" and burned 3.5 h -- that one
+# had a bounded FIRST line, then hung on the unbounded SECOND one instead).
+# With every line bounded, a dead guest fails the build in minutes and rerun.yml
+# retries it automatically.
+#
+# Values are deliberately generous, not tight: a timeout here is a crash
+# backstop, not a performance budget. Observed times on a healthy VNC+OCR run
+# are 4-20 s per menu step and ~110 s for set extraction, so 300 s / 1800 s
+# leave >10x headroom while still bounding the failure.
 
-
-
-# Bound the very first wait: a 9.x kernel can die during ISO boot before
-# sysinst ever paints this screen (seen 2026-07-26: 9.2 on an EPYC runner
-# faulted "prevented execution of 0x0 (SMEP)" mid-boot, and this line's
-# unbounded wait then polled "(no new screen text)" for 2 h until a human
-# cancelled the job).
+# First wait also covers the ISO boot (~87 s observed).
 Installation | enter | 200
 
-English | enter
+English | enter | 300
 
-Activate the current selection | enter
+Activate the current selection | enter | 300
 
-After you enter the partition | down ; enter
+After you enter the partition | down ; enter | 300
 
-Available disks | enter
+Available disks | enter | 300
 
-MBR | enter
+MBR | enter | 300
 
-You should only change the geometry | enter
+You should only change the geometry | enter | 300
 
-Use default partition sizes | down ; enter
-
-
-Change input | enter
+Use default partition sizes | down ; enter | 300
 
 
-we are now ready to install | down ; enter
+Change input | enter | 300
 
 
-Bootblocks | enter
+we are now ready to install | down ; enter | 300
 
 
-Installation without X11 | down ; enter
-
-Install from |  enter
+Bootblocks | enter | 300
 
 
-sysinst will give you the opportunity  | enter
+Installation without X11 | down ; enter | 300
+
+Install from |  enter | 300
 
 
-
-Configure the additional |  string a ; enter
+# Set extraction from the ISO runs before this screen -- the slow step.
+sysinst will give you the opportunity  | enter | 1800
 
 
 
-Which network device would you like to use | enter
+Configure the additional |  string a ; enter | 300
 
 
 
-To be able to use the network  | enter
+Which network device would you like to use | enter | 300
+
+
+
+To be able to use the network  | enter | 300
 
 
 
@@ -66,11 +77,11 @@ Perform autoconf | enter ; sleep 20 ; string anyvm.org ; enter ; sleep 3; enter;
 # "a: Configure network" -> stuck at "Which network device".
 
 #Enable sshd
-Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter
+Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter | 300
 
 
-At a minimum | enter
+At a minimum | enter | 300
 
 
 #Reboot the computer
-Reboot the computer | string d ; enter; sleep 20
+Reboot the computer | string d ; enter; sleep 20 | 300

@@ -1,77 +1,93 @@
 #
-# wait screen text  | press key
+# wait screen text  | press key | timeout seconds
+#
+# NOTE: 8.x is currently SHELVED -- netbsd-8.{0,1,2}.conf exist but 8.x is not
+# listed in conf/all.release.conf, so nothing here runs in CI today. The
+# timeouts are filled in anyway so the file cannot reintroduce the unbounded-
+# wait trap if 8.x is ever revived.
+#
+# EVERY line must carry the third (timeout) column. build.py's waitForText()
+# treats an empty timeout as "wait forever", so a single unbounded line turns
+# any guest that dies mid-install into a job that spins "(no new screen text)"
+# until the 6 h CI ceiling or a human kills it (2026-07-26/27 that cost a 2 h
+# and a 3.5 h job on the 9.x file). With every line bounded, a dead guest fails
+# the build in minutes and rerun.yml retries it automatically.
+#
+# Values are generous, not tight -- a timeout here is a crash backstop, not a
+# performance budget.
 
-Boot normally | enter
+Boot normally | enter | 300
 
-Installation | enter
+# Also covers the ISO boot.
+Installation | enter | 300
 
-unchanged | enter
+unchanged | enter | 300
 
-Install NetBSD to hard disk | enter
+Install NetBSD to hard disk | enter | 300
 
-Shall we continue | down ; enter
+Shall we continue | down ; enter | 300
 
-Available disks | enter
-
-
-
-This is the correct geometr | enter
-
-
-Edit the MBR partition table | down ; enter
-
-Do you want to install the NetBSD bootcode | enter
-
-
-Use existing partition sizes  |  down ; enter
-
-
-We now have your BSD disklabel partitions as |  enter
-
-Please enter a name for your NetBSD disk | enter
-
-Shall we continue | down; enter
-
-
-Bootblocks selection  | enter; sleep 1; enter
-
-Select your distribution | string b ; enter
-
-
-Install from | enter
-
-
-Hit enter to continue  |  enter
+Available disks | enter | 300
 
 
 
+This is the correct geometr | enter | 300
 
 
-Configure the additional items as needed |  string a ; enter 
+Edit the MBR partition table | down ; enter | 300
 
-Which network device would you like to use | enter
+Do you want to install the NetBSD bootcode | enter | 300
 
-Network media type | enter
 
-Perform autoconf | enter ; sleep 20
+Use existing partition sizes  |  down ; enter | 300
+
+
+We now have your BSD disklabel partitions as |  enter | 300
+
+Please enter a name for your NetBSD disk | enter | 300
+
+Shall we continue | down; enter | 300
+
+
+Bootblocks selection  | enter; sleep 1; enter | 300
+
+Select your distribution | string b ; enter | 300
+
+
+Install from | enter | 300
+
+
+# Set extraction runs before this screen -- the slow step.
+Hit enter to continue  |  enter | 1800
+
+
+
+
+Configure the additional items as needed |  string a ; enter  | 300
+
+Which network device would you like to use | enter | 300
+
+Network media type | enter | 300
+
+Perform autoconf | enter ; sleep 20 | 300
 
 Your DNS domain | string anyvm.org ; enter | 10
 
-The following are the values you entered |  enter
+The following are the values you entered |  enter | 300
 
-Is the network information you entered accurate | enter
-
-
-Enable sshd | string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter 
+Is the network information you entered accurate | enter | 300
 
 
-Hit enter to continue | enter
+Enable sshd | string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter  | 300
 
 
-Reboot the computer | string d ; enter
+Hit enter to continue | enter | 300
 
 
-Boot normally | enter
+Reboot the computer | string d ; enter | 300
 
 
-Installation messages | down
+Boot normally | enter | 300
+
+
+Installation messages | down | 300

@@ -1,5 +1,5 @@
 #
-# wait screen text  | press key
+# wait screen text  | press key | timeout seconds
 # evbarm-aarch64 sysinst answer file. Derived from the amd64 flow by hand-
 # driving the live installer; the aarch64 differences from amd64 are:
 #   * no "Keyboard type" menu (amd64's "English" step is gone),
@@ -7,36 +7,48 @@
 #   * GPT instead of MBR (no MBR geometry warning),
 #   * no "Bootblocks" menu (UEFI boot, not MBR bootblocks),
 #   * the disk is ld4 (virtio-blk), but "Available disks" still anchors it.
+#
+# EVERY line must carry the third (timeout) column. build.py's waitForText()
+# treats an empty timeout as "wait forever", so a single unbounded line turns
+# any guest that dies mid-install into a job that spins "(no new screen text)"
+# until the 6 h CI ceiling or a human kills it (2026-07-26/27 that cost a 2 h
+# and a 3.5 h job on the x86_64 files). With every line bounded, a dead guest
+# fails the build in minutes and rerun.yml retries it automatically.
+#
+# Values are generous, not tight -- a timeout here is a crash backstop, not a
+# performance budget. This is a TCG (emulated) VNC+OCR build, so everything is
+# slower than the amd64/KVM flow: the timeouts below are roughly double.
 
 
 
-Installation | enter
+# First wait also covers the ISO boot, which is slow under TCG emulation.
+Installation | enter | 600
 
 # Main menu (a: Install NetBSD to hard disk / b: Upgrade ...). The cursor
 # defaults to "Install", so just press enter; anchor on "Upgrade NetBSD on a
 # hard disk" which only appears on this menu.
-Upgrade NetBSD on a hard disk | enter
+Upgrade NetBSD on a hard disk | enter | 600
 
-After you enter the partition | down ; enter
+After you enter the partition | down ; enter | 600
 
-Available disks | enter
+Available disks | enter | 600
 
 # aarch64 boots via UEFI, so pick GPT (cursor default a: GPT). Replaces amd64's
 # "MBR" + "You should only change the geometry" steps.
-partitioning scheme | enter
+partitioning scheme | enter | 600
 
-Use default partition sizes | down ; enter
-
-
-Change input | enter
+Use default partition sizes | down ; enter | 600
 
 
-we are now ready to install | down ; enter
+Change input | enter | 600
+
+
+we are now ready to install | down ; enter | 600
 
 
 # No "Bootblocks" screen on aarch64 -- newfs runs, then the distribution menu
 # appears directly. Select "b: Installation without X11".
-Installation without X11 | down ; enter
+Installation without X11 | down ; enter | 600
 
 # CI tesseract misreads "Install from" as "Install fron" (m->n), so the
 # "Install from" anchor never matched and the install hung here ~22 min until
@@ -44,26 +56,28 @@ Installation without X11 | down ; enter
 # (the OCR-fragile letters) and unique to this set-source screen -- step 9's
 # set-group screen has a different header ("The NetBSD distribution is broken
 # into..."). enter still accepts the default >a: CD-ROM / DVD / install image.
-disk is now ready | enter
+disk is now ready | enter | 600
 
 
-sysinst will give you the opportunity  | enter
+# Set extraction from the ISO runs before this screen -- the slow step, and
+# slower still under TCG.
+sysinst will give you the opportunity  | enter | 1800
 
 
-Changing local password for root | enter
+Changing local password for root | enter | 600
 
 
-Configure the additional |  string a ; enter
+Configure the additional |  string a ; enter | 600
 
 
 
 # OCR on the virtio-gpu framebuffer misreads the capital "W" in "Which" as "H"
 # ("Hhich"), so anchor on the text after it.
-network device would you like to use | enter
+network device would you like to use | enter | 600
 
 
 
-To be able to use the network  | enter
+To be able to use the network  | enter | 600
 
 
 
@@ -73,19 +87,19 @@ Perform autoconf | enter ; sleep 20 ; string anyvm.org ; enter ; sleep 3; enter;
 
 # "information" has an 'm' CI OCR turns to 'n'; anchor on the m-free
 # "values you entered" (from "The following are the values you entered.").
-values you entered | enter
+values you entered | enter | 600
 
 #Enable sshd
-Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter
+Fetch and unpack| string g ; enter ; sleep 1; string h ; enter ; sleep 1; string i ; enter ; sleep 1; string x ; enter | 600
 
 
 # "minimum" (three m's) is OCR-fragile; anchor on the m-free "you should edit"
 # (from "At a minimum, you should edit /etc/rc.conf to match your needs").
-you should edit | enter
+you should edit | enter | 600
 
 
 #Reboot the computer
 # "computer" has an 'm'; anchor on the m-free "install additional sets" (from
 # the main-menu line "Re-install sets or install additional sets"). The key 'd'
 # still selects "Reboot the computer" on that menu.
-install additional sets | string d ; enter; sleep 20
+install additional sets | string d ; enter; sleep 20 | 600
