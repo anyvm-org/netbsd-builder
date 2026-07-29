@@ -7,6 +7,22 @@
 echo 'dhcpcd_flags="-4"' >> /etc/rc.conf
 
 
+# Do not run postfix. These images are CI workers, never mail servers, so the
+# daemon is dead weight -- and worse, it is an amplifier: /etc/rc.d/postfix
+# resolves the host's name at startup, so with no working network it BLOCKS,
+# and because it sits late in the rc order nothing after it ever runs. A guest
+# whose DHCP lease is late or missing therefore stops dead at
+# "Starting postfix." -- no inetd, no cron, no getty, no console login, no
+# further serial output at all. That is exactly how netbsd 10.0-aarch64 failed
+# in anyvm run 30353533772: three jobs sat at that line until the 600 s boot
+# probe gave up, and the frozen console made it look like a kernel hang rather
+# than a network problem. Turning postfix off does not fix a missing lease, but
+# it keeps rc completing so the console still reaches a login prompt and the
+# failure stays diagnosable. Compare a green boot, where the lease lands a few
+# seconds into postfix's lookup and rc resumes immediately.
+echo 'postfix=NO' >> /etc/rc.conf
+
+
 echo 'name_servers="8.8.8.8 1.1.1.1"' >>/etc/resolvconf.conf
 
 resolvconf -u
