@@ -41,13 +41,14 @@
 # Matching final release directories only means the hook stays quiet
 # through the entire RC cycle and speaks once, when a real release lands.
 #
-# Consequence worth knowing: because the 11.0 template's URLs embed
-# "11.0_RC7", the confs derived for the next NetBSD release will not
-# validate either -- the gate will reject them and the release has to be
-# added by hand. That is the intended failure: loud and blocking, never a
-# silently mislabelled image. Today the newest final directory is 10.1,
-# for which conf/netbsd-10.1*.conf already exist, so watch.py logs
-# "10.1 already has a conf, nothing to do" and stops there.
+# When the final directory eventually appears for a release whose confs
+# were pinned to RC media (as happened to 11.0 on 2026-08), watch.py's
+# refresh path handles it: the hook reports the final version, decide()
+# sees the existing confs still carry an RC token in their URLs, and the
+# URLs are rewritten to the final media behind the same HEAD gate. With
+# the confs on final URLs, the NEXT release (11.1) also derives cleanly
+# by plain substitution -- the RC-era "has to be added by hand" caveat
+# died with the RC pins.
 #
 # stdlib only (urllib.request, re, sys, os) -- no external dependencies.
 
