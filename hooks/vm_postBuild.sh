@@ -55,26 +55,42 @@ anyvm_esp=$(mount | awk '$5=="msdos"{print $3; exit}')
 # marker in that man page) shadows this file entirely. enablessh.txt therefore
 # no longer writes PKG_PATH.
 #
-# Entry 1 is the rolling per-release URL, the same one pkg_add would default
-# to. It 302-redirects to the current quarterly, so it self-heals across
-# quarterly rollovers and needs no maintenance.
+# Entry 1 is the newest quarterly that ACTUALLY EXISTS, found by scraping
+# the arch directory listing at bake time. The old entry 1 was the rolling
+# per-release alias, on the theory that its 302 "self-heals across
+# quarterly rollovers and needs no maintenance" -- refuted 2026-08-03:
+# upstream neglects those symlinks (riscv64/11.0 still pointed at the
+# DELETED 11.0_2025Q4 for weeks after 11.0_2026Q2 replaced it), which left
+# the baked PKG_PATH dead on the whole riscv64 image and every runtime
+# pkg_add failing (netbsd-vm run 30790664175). Listings do not lie about
+# which directories exist; aliases do. Same lesson, same fix shape as the
+# build-time scrape in conf/netbsd-11.0-riscv64.conf.
 #
-# Entry 2 pins 9.0_2026Q1 and exists because entry 1 is currently unusable on
-# 9.x/x86_64: that redirect now lands on x86_64/9.0_2026Q2, whose bulk build
-# shipped ZERO packages (checked 2026-07-25 -- 10.x/11.0 Q2 hold ~27.5k each,
-# and aarch64 9.x still resolves to its Q1, which is why only 9.x amd64 broke).
-# 9.0_2026Q1 is intact (27823 packages on x86_64, 21298 on aarch64) and is
-# served with no redirect, which matters because the 9.x pkg_add does not
-# follow redirects. Entry 2 is written unconditionally rather than behind a
-# `case $(uname -r)` -- on 10.x/11.0 entry 1 satisfies every request so it is
-# never consulted, and on arches that never had a 9.x set at all (sparc64 only
-# ships 10.x/11.0) it is simply an URL nothing ever fetches. Drop entry 2 once
-# a quarterly ships a real 9.x bulk build again.
+# Entry 2 keeps the rolling alias as the self-healing backup for the day
+# the scraped quarterly is itself rotated away AND the alias is healthy.
+#
+# Entry 3 pins 9.0_2026Q1 for the 9.x era: the 9.x amd64 quarterly redirect
+# lands on a Q2 bulk build that shipped ZERO packages, and 9.x pkg_add
+# cannot follow redirects anyway. Harmless on 10.x/11.0 (never consulted)
+# and on arches with no 9.x set (nothing ever fetches it). Drop it once a
+# quarterly ships a real 9.x bulk build again.
+#
+# base ftp(1) speaks plain http on every NetBSD release we ship; if the
+# scrape fails (offline mirror at bake time), entry 1 degrades to the
+# alias, i.e. exactly the previous behavior, never an empty PKG_PATH.
 anyvm_pkgarch=$(uname -p)
 anyvm_pkgrel=$(uname -r | cut -f 1,2 -d. | cut -f 1 -d_)
 anyvm_pkgbase=http://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD
+anyvm_quarter=$(ftp -o - "$anyvm_pkgbase/$anyvm_pkgarch/" 2>/dev/null \
+  | grep -oE "${anyvm_pkgrel}_[0-9][0-9][0-9][0-9]Q[0-9]" \
+  | sort | tail -n 1)
+if [ -n "$anyvm_quarter" ]; then
+  anyvm_entry1=$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_quarter/All
+else
+  anyvm_entry1=$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_pkgrel/All/
+fi
 cat >/etc/pkg_install.conf <<ANYVM_EOF
-PKG_PATH=$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_pkgrel/All/;$anyvm_pkgbase/$anyvm_pkgarch/9.0_2026Q1/All
+PKG_PATH=$anyvm_entry1;$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_pkgrel/All/;$anyvm_pkgbase/$anyvm_pkgarch/9.0_2026Q1/All
 ANYVM_EOF
 cat /etc/pkg_install.conf
 
