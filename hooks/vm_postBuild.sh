@@ -71,9 +71,12 @@ anyvm_esp=$(mount | awk '$5=="msdos"{print $3; exit}')
 #
 # Entry 3 pins 9.0_2026Q1 for the 9.x era: the 9.x amd64 quarterly redirect
 # lands on a Q2 bulk build that shipped ZERO packages, and 9.x pkg_add
-# cannot follow redirects anyway. Harmless on 10.x/11.0 (never consulted)
-# and on arches with no 9.x set (nothing ever fetches it). Drop it once a
-# quarterly ships a real 9.x bulk build again.
+# cannot follow redirects anyway. Only appended when the arch listing
+# actually contains 9.0_2026Q1 (x86_64 and aarch64 do; sparc64 and riscv64
+# do not): pkg_add consults EVERY entry while searching, so a dead pin is
+# not silent -- it sprays "Can't process ... Not Found" noise on every
+# runtime pkg_add (netbsd-vm run 30827543128, 10.1-sparc64). Drop the pin
+# once a quarterly ships a real 9.x bulk build again.
 #
 # base ftp(1) speaks plain http on every NetBSD release we ship; if the
 # scrape fails (offline mirror at bake time), entry 1 degrades to the
@@ -81,7 +84,8 @@ anyvm_esp=$(mount | awk '$5=="msdos"{print $3; exit}')
 anyvm_pkgarch=$(uname -p)
 anyvm_pkgrel=$(uname -r | cut -f 1,2 -d. | cut -f 1 -d_)
 anyvm_pkgbase=http://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD
-anyvm_quarter=$(ftp -o - "$anyvm_pkgbase/$anyvm_pkgarch/" 2>/dev/null \
+anyvm_listing=$(ftp -o - "$anyvm_pkgbase/$anyvm_pkgarch/" 2>/dev/null)
+anyvm_quarter=$(printf '%s\n' "$anyvm_listing" \
   | grep -oE "${anyvm_pkgrel}_[0-9][0-9][0-9][0-9]Q[0-9]" \
   | sort | tail -n 1)
 if [ -n "$anyvm_quarter" ]; then
@@ -89,8 +93,12 @@ if [ -n "$anyvm_quarter" ]; then
 else
   anyvm_entry1=$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_pkgrel/All/
 fi
+anyvm_pin=
+if printf '%s\n' "$anyvm_listing" | grep -q "9\.0_2026Q1"; then
+  anyvm_pin=";$anyvm_pkgbase/$anyvm_pkgarch/9.0_2026Q1/All"
+fi
 cat >/etc/pkg_install.conf <<ANYVM_EOF
-PKG_PATH=$anyvm_entry1;$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_pkgrel/All/;$anyvm_pkgbase/$anyvm_pkgarch/9.0_2026Q1/All
+PKG_PATH=$anyvm_entry1;$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_pkgrel/All/$anyvm_pin
 ANYVM_EOF
 cat /etc/pkg_install.conf
 
