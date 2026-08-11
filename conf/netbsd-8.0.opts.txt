@@ -71,7 +71,8 @@ Network media type | enter | 300
 
 Perform autoconf | enter ; sleep 20 | 300
 
-Your DNS domain | string anyvm.org ; enter | 10
+# "Your DNS domain:" -> leave empty.
+Your DNS domain | enter | 10
 
 The following are the values you entered |  enter | 300
 

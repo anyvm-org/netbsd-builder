@@ -72,7 +72,7 @@ To be able to use the network  | enter | 300
 
 
 
-Perform autoconf | enter ; sleep 20 ; string anyvm.org ; enter ; sleep 3; enter; sleep 3; enter| 10
+Perform autoconf | enter ; sleep 20 ; string netbsd ; enter ; sleep 3; enter; sleep 3; enter| 10
 
 
 

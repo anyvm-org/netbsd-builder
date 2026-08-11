@@ -83,7 +83,7 @@ To be able to use the network | enter | 60
 Perform autoconf | enter | 60
 
 # DHCP succeeds (slirp hands out 192.168.122.254). Set the host name.
-Your host name | string anyvm.org ; enter | 90
+Your host name | string netbsd ; enter | 90
 
 # "Your DNS domain:" -> leave empty.
 Your DNS domain | enter | 30
