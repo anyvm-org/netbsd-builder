@@ -180,6 +180,15 @@
       "shutdown": "/sbin/shutdown -p now",
       "desktop": false,
       "build": true
+    },
+    {
+      "tag": "11.0-microvm",
+      "release": "11.0-microvm",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
     }
   ]
 }
