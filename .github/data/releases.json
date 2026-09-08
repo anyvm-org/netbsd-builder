@@ -92,6 +92,24 @@
       "build": true
     },
     {
+      "tag": "9.5",
+      "release": "9.5",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "9.5-aarch64",
+      "release": "9.5",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
       "tag": "10.0",
       "release": "10.0",
       "arch": "x86_64",
