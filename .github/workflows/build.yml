@@ -53,7 +53,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ["9.0", "9.0-aarch64", "9.1", "9.1-aarch64", "9.2", "9.2-aarch64", "9.3", "9.3-aarch64", "9.4", "9.4-aarch64", "10.0", "10.0-aarch64", "10.0-sparc64", "10.1", "10.1-aarch64", "10.1-sparc64", "11.0", "11.0-aarch64", "11.0-riscv64", "11.0-sparc64", "11.0-microvm"]
+        os: ["9.0", "9.0-aarch64", "9.1", "9.1-aarch64", "9.2", "9.2-aarch64", "9.3", "9.3-aarch64", "9.4", "9.4-aarch64", "9.5", "9.5-aarch64", "10.0", "10.0-aarch64", "10.0-sparc64", "10.1", "10.1-aarch64", "10.1-sparc64", "11.0", "11.0-aarch64", "11.0-riscv64", "11.0-sparc64", "11.0-microvm"]
     runs-on: ubuntu-24.04
     steps:
 #    - name: Free Disk Space (Ubuntu)
