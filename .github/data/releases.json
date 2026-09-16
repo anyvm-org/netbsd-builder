@@ -164,6 +164,33 @@
       "build": true
     },
     {
+      "tag": "10.2",
+      "release": "10.2",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "10.2-aarch64",
+      "release": "10.2",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "10.2-sparc64",
+      "release": "10.2",
+      "arch": "sparc64",
+      "sync": "scp,sshfs,nfs,rsync,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
       "tag": "11.0",
       "release": "11.0",
       "arch": "x86_64",
