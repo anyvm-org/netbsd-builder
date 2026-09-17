@@ -68,37 +68,94 @@ anyvm_esp=$(mount | awk '$5=="msdos"{print $3; exit}')
 #
 # Entry 2 keeps the rolling alias as the self-healing backup for the day
 # the scraped quarterly is itself rotated away AND the alias is healthy.
+# It is emitted unconditionally; entry 1 is simply omitted when no exact
+# quarterly exists, rather than falling back to this same URL (which used
+# to put the identical 404 in the list twice).
 #
-# Entry 3 pins 9.0_2026Q1 for the 9.x era: the 9.x amd64 quarterly redirect
-# lands on a Q2 bulk build that shipped ZERO packages, and 9.x pkg_add
-# cannot follow redirects anyway. Only appended when the arch listing
-# actually contains 9.0_2026Q1 (x86_64 and aarch64 do; sparc64 and riscv64
-# do not): pkg_add consults EVERY entry while searching, so a dead pin is
-# not silent -- it sprays "Can't process ... Not Found" noise on every
-# runtime pkg_add (netbsd-vm run 30827543128, 10.1-sparc64). Drop the pin
-# once a quarterly ships a real 9.x bulk build again.
+# Entry 3 and beyond are the BRANCH fallback: EVERY quarterly built for
+# the branch's base release ("<major>.0_YYYYQn"), newest first. A release
+# gets binary packages from its own major branch -- that is upstream's own
+# rule, not an inference: ftp.netbsd.org serves ".../x86_64/10.1/All/" as
+# a 302 to ".../x86_64/10.0_2026Q2/All/", which is why 10.1 builds green
+# today with no 10.1_* quarterly of its own. They are scraped from the
+# listing, never taken as an alias, for the riscv64 reason in entry 1.
+#
+# ALL of them, not just the newest, because NEWEST IS NOT BEST: a bulk
+# build can be partial. sparc64's 10.0_2026Q1 carries 15176 packages but
+# none of rsync, fuse-sshfs or tree, while the OLDER 10.0_2024Q3 is
+# complete at 25056 (counted 2026-09-17) -- exactly the same shape as the
+# empty 9.0_2026Q2 below. Listing every quarterly costs one extra round of
+# "Not Found" per miss and lets pkg_add, which consults entries in order,
+# walk back to a build that actually has the package.
+#
+# This entry REPLACED a hardcoded 9.0_2026Q1 pin whose guard tested the
+# arch LISTING for that directory instead of testing the GUEST's release.
+# Every arch listing that has 9.x at all contains it, so the pin was
+# appended to 10.x and 11.x images too, and pkg_add -- which only WARNS
+# on a platform mismatch -- happily installed 9.x packages onto a 10.x
+# guest whenever the earlier entries missed. NetBSD 10.2 hit exactly
+# that on 2026-09-17 (build run 35161331304): no 10.2/ directory exists
+# upstream yet, so both earlier entries 404'd, rsync-3.4.3 came from
+# 9.0_2026Q1 with only "built for NetBSD/x86_64 9.0 vs 10.2 (this host)",
+# and the installed binary could not start -- 'Shared object
+# "libcrypto.so.14" not found', because 9.x links libcrypto.so.14 and
+# 10.2 does not ship it. build.py's post-install verification caught it
+# and failed the build, which is the intended outcome, but the image had
+# no business getting 9.x packages in the first place.
+#
+# 9.x KEEPS the 9.0_2026Q1 pin rather than the newest branch quarterly:
+# 9.0_2026Q2 exists but shipped ZERO packages, and 9.x pkg_add cannot
+# follow redirects either. Drop the special case once a quarterly ships
+# a real 9.x bulk build again.
+#
+# A branch quarterly that would repeat entry 1 is skipped (that is every
+# ".0" release, e.g. 11.0), and a branch with no quarterly on this arch
+# contributes nothing (riscv64 has only 11.0_2026Q2). pkg_add consults
+# EVERY entry while searching, so a dead entry is not silent -- it sprays
+# "Can't process ... Not Found" noise on every runtime pkg_add
+# (netbsd-vm run 30827543128, 10.1-sparc64). That is the price of the
+# walk-back above; keep the list to this release and its branch so it
+# stays two or three entries, never the whole listing.
 #
 # base ftp(1) speaks plain http on every NetBSD release we ship; if the
-# scrape fails (offline mirror at bake time), entry 1 degrades to the
-# alias, i.e. exactly the previous behavior, never an empty PKG_PATH.
+# scrape fails (offline mirror at bake time), the list degrades to the
+# rolling alias alone, never to an empty PKG_PATH.
 anyvm_pkgarch=$(uname -p)
 anyvm_pkgrel=$(uname -r | cut -f 1,2 -d. | cut -f 1 -d_)
+anyvm_pkgmajor=$(echo "$anyvm_pkgrel" | cut -f 1 -d.)
 anyvm_pkgbase=http://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD
 anyvm_listing=$(ftp -o - "$anyvm_pkgbase/$anyvm_pkgarch/" 2>/dev/null)
-anyvm_quarter=$(printf '%s\n' "$anyvm_listing" \
-  | grep -oE "${anyvm_pkgrel}_[0-9][0-9][0-9][0-9]Q[0-9]" \
-  | sort | tail -n 1)
-if [ -n "$anyvm_quarter" ]; then
-  anyvm_entry1=$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_quarter/All
+
+# Every "<prefix>_YYYYQn" directory present in the listing, NEWEST FIRST
+# (empty when there is none). All candidates share the prefix, so a plain
+# reverse sort orders them by date.
+anyvm_all_q() {
+  printf '%s\n' "$anyvm_listing" \
+    | grep -oE "$1_[0-9][0-9][0-9][0-9]Q[0-9]" \
+    | sort -ru
+}
+
+anyvm_q_exact=$(anyvm_all_q "$anyvm_pkgrel" | head -n 1)
+if [ "$anyvm_pkgmajor" = "9" ]; then
+  anyvm_q_branch=$(printf '%s\n' "$anyvm_listing" \
+    | grep -o "9\.0_2026Q1" | head -n 1)
 else
-  anyvm_entry1=$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_pkgrel/All/
+  anyvm_q_branch=$(anyvm_all_q "$anyvm_pkgmajor\.0")
 fi
-anyvm_pin=
-if printf '%s\n' "$anyvm_listing" | grep -q "9\.0_2026Q1"; then
-  anyvm_pin=";$anyvm_pkgbase/$anyvm_pkgarch/9.0_2026Q1/All"
+
+anyvm_path=
+if [ -n "$anyvm_q_exact" ]; then
+  anyvm_path=$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_q_exact/All\;
 fi
+anyvm_path=$anyvm_path$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_pkgrel/All/
+for anyvm_q in $anyvm_q_branch; do
+  if [ "$anyvm_q" != "$anyvm_q_exact" ]; then
+    anyvm_path=$anyvm_path\;$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_q/All
+  fi
+done
+
 cat >/etc/pkg_install.conf <<ANYVM_EOF
-PKG_PATH=$anyvm_entry1;$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_pkgrel/All/$anyvm_pin
+PKG_PATH=$anyvm_path
 ANYVM_EOF
 cat /etc/pkg_install.conf
 
