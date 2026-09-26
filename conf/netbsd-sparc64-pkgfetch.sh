@@ -29,8 +29,27 @@ mkdir -p "$D"
 /sbin/mount_tmpfs -s 512m tmpfs "$D"
 cd "$D"
 
+# ftp(8) with retries. Since 2026-09 the only mirror with a complete sparc64
+# 10.0 set is ftp.allbsd.org (see netbsd-10.2-sparc64.conf), and it stalls
+# now and then: a local 10.1-sparc64 run fetched pkg_summary.gz fine, then
+# died on "Timeout establishing SSL connection to `ftp.allbsd.org'" for one
+# of the 12 package files (ftp's handshake timeout is -q, default 60 s). A
+# fresh connection is what helps, not a longer wait on the stuck one.
+fetch() {
+    _n=1
+    until ftp -o "$1" "$2" < /dev/null; do
+        if [ "$_n" -ge 5 ]; then
+            echo "pkgfetch: giving up on $2 after $_n attempts" >&2
+            return 1
+        fi
+        echo "pkgfetch: fetching $2 failed (attempt $_n/5), retrying" >&2
+        _n=$((_n + 1))
+        sleep 10
+    done
+}
+
 echo "pkgfetch phase 1: downloading package closure for: $ANYVM_PKGS"
-ftp -o pkg_summary.gz "$P/pkg_summary.gz" < /dev/null
+fetch pkg_summary.gz "$P/pkg_summary.gz"
 gunzip -f pkg_summary.gz
 
 # Closure over pkg_summary. Records carry PKGNAME=<name>-<version> and zero or
@@ -88,7 +107,7 @@ END {
 
 echo "pkgfetch phase 1: fetching $(wc -l < files.txt | tr -d ' ') package files to tmpfs"
 for f in $(cat files.txt); do
-    ftp -o "$f" "$P/$f" < /dev/null
+    fetch "$f" "$P/$f"
 done
 
 # Let the NIC go quiet before the disk-heavy phase.
