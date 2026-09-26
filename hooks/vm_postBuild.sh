@@ -83,10 +83,12 @@ anyvm_esp=$(mount | awk '$5=="msdos"{print $3; exit}')
 # ALL of them, not just the newest, because NEWEST IS NOT BEST: a bulk
 # build can be partial. sparc64's 10.0_2026Q1 carries 15176 packages but
 # none of rsync, fuse-sshfs or tree, while the OLDER 10.0_2024Q3 is
-# complete at 25056 (counted 2026-09-17) -- exactly the same shape as the
-# empty 9.0_2026Q2 below. Listing every quarterly costs one extra round of
-# "Not Found" per miss and lets pkg_add, which consults entries in order,
-# walk back to a build that actually has the package.
+# complete at 25056 (counted 2026-09-17). Same shape on 9.x: 9.0_2026Q2
+# carries 26863 packages on x86_64 but no fuse-sshfs, which only
+# 9.0_2026Q1 has (ftp.fr.NetBSD.org, counted 2026-09-26). Listing every
+# quarterly costs one extra round of "Not Found" per miss and lets
+# pkg_add, which consults entries in order, walk back to a build that
+# actually has the package.
 #
 # This entry REPLACED a hardcoded 9.0_2026Q1 pin whose guard tested the
 # arch LISTING for that directory instead of testing the GUEST's release.
@@ -103,10 +105,24 @@ anyvm_esp=$(mount | awk '$5=="msdos"{print $3; exit}')
 # and failed the build, which is the intended outcome, but the image had
 # no business getting 9.x packages in the first place.
 #
-# 9.x KEEPS the 9.0_2026Q1 pin rather than the newest branch quarterly:
-# 9.0_2026Q2 exists but shipped ZERO packages, and 9.x pkg_add cannot
-# follow redirects either. Drop the special case once a quarterly ships
-# a real 9.x bulk build again.
+# A BRANCH FTP.NETBSD.ORG NO LONGER LISTS COMES FROM A DOWNSTREAM MIRROR.
+# Between 2026-09-17 and 2026-09-25 ftp.netbsd.org (and cdn.NetBSD.org)
+# dropped every 9.x package directory. The trees moved to
+# archive.NetBSD.org, whose package downloads answer HTTP 402 with a
+# bot-check form (tested with curl), so the archive is not a source. The
+# old 9.x entry here -- a hardcoded 9.0_2026Q1 pin looked up in
+# ftp.netbsd.org's listing -- then matched nothing, and every 9.x image
+# would have baked only the dead alias, leaving the build-time pkg_add
+# nothing to install from. ftp.fr.NetBSD.org and ftp.jaist.ac.jp still
+# list the 9.0 quarterlies (fr has 9.0_2026Q1 and 9.0_2026Q2 for x86_64
+# and aarch64, jaist lacks 9.0_2026Q1 on x86_64; checked 2026-09-26), so
+# when ftp.netbsd.org ANSWERS but lists no "<major>.0_*" quarterly, the
+# listing and every URL below come from the first of those that does.
+# An unreachable ftp.netbsd.org is not that case and changes nothing
+# (see the last paragraph). The pin's other reason is gone as well:
+# 9.0_2026Q2 no longer ships zero packages. 9.x pkg_add still cannot
+# follow redirects, and both mirrors answer these directories with a
+# plain 200.
 #
 # A branch quarterly that would repeat entry 1 is skipped (that is every
 # ".0" release, e.g. 11.0), and a branch with no quarterly on this arch
@@ -135,13 +151,23 @@ anyvm_all_q() {
     | sort -ru
 }
 
-anyvm_q_exact=$(anyvm_all_q "$anyvm_pkgrel" | head -n 1)
-if [ "$anyvm_pkgmajor" = "9" ]; then
-  anyvm_q_branch=$(printf '%s\n' "$anyvm_listing" \
-    | grep -o "9\.0_2026Q1" | head -n 1)
-else
-  anyvm_q_branch=$(anyvm_all_q "$anyvm_pkgmajor\.0")
+# ftp.netbsd.org answered but no longer lists this branch (9.x): take the
+# first downstream mirror that still does. See "A BRANCH FTP.NETBSD.ORG NO
+# LONGER LISTS" above.
+if [ -n "$anyvm_listing" ] && [ -z "$(anyvm_all_q "$anyvm_pkgmajor\.0")" ]; then
+  anyvm_home_listing=$anyvm_listing
+  for anyvm_mirror in http://ftp.fr.NetBSD.org http://ftp.jaist.ac.jp; do
+    anyvm_listing=$(ftp -o - "$anyvm_mirror/pub/pkgsrc/packages/NetBSD/$anyvm_pkgarch/" 2>/dev/null)
+    if [ -n "$(anyvm_all_q "$anyvm_pkgmajor\.0")" ]; then
+      anyvm_pkgbase=$anyvm_mirror/pub/pkgsrc/packages/NetBSD
+      break
+    fi
+    anyvm_listing=$anyvm_home_listing
+  done
 fi
+
+anyvm_q_exact=$(anyvm_all_q "$anyvm_pkgrel" | head -n 1)
+anyvm_q_branch=$(anyvm_all_q "$anyvm_pkgmajor\.0")
 
 anyvm_path=
 if [ -n "$anyvm_q_exact" ]; then
