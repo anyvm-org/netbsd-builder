@@ -124,14 +124,41 @@ anyvm_esp=$(mount | awk '$5=="msdos"{print $3; exit}')
 # follow redirects, and both mirrors answer these directories with a
 # plain 200.
 #
+# THE BRANCH FALLBACK SPANS EVERY DOWNSTREAM MIRROR, not only the first
+# one that lists the branch. By 2026-10-03 ftp.fr.NetBSD.org had dropped
+# its 9.0 quarterlies too, and the only x86_64 one left on
+# ftp.jaist.ac.jp, 9.0_2026Q2, has no fuse-sshfs: pkgsrc-2026Q2 moved
+# sshfs to 3.7.5 on the FUSE 3 API (filesystems/fuse-sshfs/Makefile,
+# USE_FUSE3=yes), and neither the x86_64 nor the aarch64 9.0_2026Q2 build
+# has the package, while 9.0_2026Q1 and the 2025 quarterlies do (NetBSD 9
+# is past upstream support: netbsd.org/releases/formal.html, "The NetBSD-9
+# and older branches have reached End-Of-Life and are no longer
+# supported."). Those older builds survive on ftp.allbsd.org, which lists
+# 9.0_2025Q3 and 9.0_2025Q4 for x86_64 (plus 9.0_2026Q1 and 9.0_2026Q2 for
+# aarch64); its x86_64 9.0_2025Q4 carries fuse-sshfs-3.7.4anb1 among 27281
+# packages. It answers https only (plain http is a 301, which 9.x pkg_add
+# cannot follow), so it is listed as https. Its packages are xz-compressed
+# under the .tgz name, like the official 9.0_2026Q2 ones on jaist, which
+# 9.x pkg_add installed in run 37117848043 (rsync-3.4.4), so the
+# compression is not a problem. Entries 1-3 still come from the first
+# mirror that lists the branch; every branch quarterly a LATER mirror
+# lists under a name not seen yet is appended after them, so pkg_add
+# walks back to a build that has the package while anything the newest
+# build does have is still taken from there. Mixing builds is what the
+# branch fallback above already does: a dependency pulled in by a package
+# from an older build is satisfied by the first entry that carries it.
+# With jaist alone, every 9.x x86_64 build of run 37117848043 died on "no
+# pkg found for 'fuse-sshfs'".
+#
 # A branch quarterly that would repeat entry 1 is skipped (that is every
 # ".0" release, e.g. 11.0), and a branch with no quarterly on this arch
 # contributes nothing (riscv64 has only 11.0_2026Q2). pkg_add consults
 # EVERY entry while searching, so a dead entry is not silent -- it sprays
 # "Can't process ... Not Found" noise on every runtime pkg_add
 # (netbsd-vm run 30827543128, 10.1-sparc64). That is the price of the
-# walk-back above; keep the list to this release and its branch so it
-# stays two or three entries, never the whole listing.
+# walk-back above; keep the list to this release and its branch -- two or
+# three entries from the first mirror plus the branch builds the later
+# mirrors still carry -- never the whole listing.
 #
 # base ftp(1) speaks plain http on every NetBSD release we ship; if the
 # scrape fails (offline mirror at bake time), the list degrades to the
@@ -152,18 +179,42 @@ anyvm_all_q() {
 }
 
 # ftp.netbsd.org answered but no longer lists this branch (9.x): take the
-# first downstream mirror that still does. See "A BRANCH FTP.NETBSD.ORG NO
-# LONGER LISTS" above.
+# first downstream mirror that still does, and the branch quarterlies the
+# later mirrors list under other names. See "A BRANCH FTP.NETBSD.ORG NO
+# LONGER LISTS" and "THE BRANCH FALLBACK SPANS EVERY DOWNSTREAM MIRROR"
+# above.
+anyvm_extra=
 if [ -n "$anyvm_listing" ] && [ -z "$(anyvm_all_q "$anyvm_pkgmajor\.0")" ]; then
   anyvm_home_listing=$anyvm_listing
-  for anyvm_mirror in http://ftp.fr.NetBSD.org http://ftp.jaist.ac.jp; do
+  anyvm_first_listing=
+  anyvm_seen_q=
+  for anyvm_mirror in http://ftp.fr.NetBSD.org http://ftp.jaist.ac.jp https://ftp.allbsd.org; do
     anyvm_listing=$(ftp -o - "$anyvm_mirror/pub/pkgsrc/packages/NetBSD/$anyvm_pkgarch/" 2>/dev/null)
-    if [ -n "$(anyvm_all_q "$anyvm_pkgmajor\.0")" ]; then
-      anyvm_pkgbase=$anyvm_mirror/pub/pkgsrc/packages/NetBSD
-      break
+    anyvm_mirror_q=$(anyvm_all_q "$anyvm_pkgmajor\.0")
+    if [ -z "$anyvm_mirror_q" ]; then
+      continue
     fi
-    anyvm_listing=$anyvm_home_listing
+    if [ -z "$anyvm_first_listing" ]; then
+      anyvm_pkgbase=$anyvm_mirror/pub/pkgsrc/packages/NetBSD
+      anyvm_first_listing=$anyvm_listing
+      anyvm_seen_q=$(printf ' %s' $anyvm_mirror_q)
+      continue
+    fi
+    for anyvm_q in $anyvm_mirror_q; do
+      case "$anyvm_seen_q " in
+        *" $anyvm_q "*) ;;
+        *)
+          anyvm_seen_q="$anyvm_seen_q $anyvm_q"
+          anyvm_extra="$anyvm_extra $anyvm_mirror/pub/pkgsrc/packages/NetBSD/$anyvm_pkgarch/$anyvm_q/All"
+          ;;
+      esac
+    done
   done
+  if [ -n "$anyvm_first_listing" ]; then
+    anyvm_listing=$anyvm_first_listing
+  else
+    anyvm_listing=$anyvm_home_listing
+  fi
 fi
 
 anyvm_q_exact=$(anyvm_all_q "$anyvm_pkgrel" | head -n 1)
@@ -178,6 +229,9 @@ for anyvm_q in $anyvm_q_branch; do
   if [ "$anyvm_q" != "$anyvm_q_exact" ]; then
     anyvm_path=$anyvm_path\;$anyvm_pkgbase/$anyvm_pkgarch/$anyvm_q/All
   fi
+done
+for anyvm_q in $anyvm_extra; do
+  anyvm_path=$anyvm_path\;$anyvm_q
 done
 
 cat >/etc/pkg_install.conf <<ANYVM_EOF
