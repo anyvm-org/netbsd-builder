@@ -35,5 +35,21 @@ fetch_one() {
   ls -l "$outdir/$asset"
 }
 
-# One line per microvm variant conf; keep in step with conf/*-microvm.conf.
-fetch_one 11.0 amd64 netbsd-11.0-microvm-kernel
+# One kernel per -microvm release in the build list (conf/all.release.conf),
+# so a microvm conf the upstream watcher adds needs no edit here. This used
+# to be a hand-kept line per release, and v2.2.8 shipped 11.1-microvm with
+# no kernel asset (anyvm could not boot it) because nobody added the line.
+# Run from the repo root (the release workflow's checkout).
+n=0
+for tag in $(grep -oE '"[^"]+-microvm"' conf/all.release.conf | tr -d '"'); do
+  if [ ! -f "conf/netbsd-$tag.conf" ]; then
+    echo "fetch-microvm-kernel: $tag is in conf/all.release.conf but conf/netbsd-$tag.conf is missing"
+    exit 1
+  fi
+  fetch_one "${tag%-microvm}" amd64 "netbsd-$tag-kernel"
+  n=$((n + 1))
+done
+if [ "$n" -eq 0 ]; then
+  echo "fetch-microvm-kernel: no -microvm release in conf/all.release.conf"
+  exit 1
+fi

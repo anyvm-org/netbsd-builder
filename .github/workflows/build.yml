@@ -208,9 +208,11 @@ jobs:
         # by default, but on a 'release' event that can be a branch ref, failing
         # with "GitHub Releases requires a tag".
         tag_name: ${{ github.event.release.tag_name || github.ref_name }}
+        # The kernel glob matches whatever fetch-microvm-kernel.sh staged
+        # (one per -microvm release); that script fails when it finds none.
         files: |
           build/qemu-10.2.3-sparc64-noble.tar.zst
-          build/netbsd-11.0-microvm-kernel
+          build/netbsd-*-microvm-kernel
 
 
 
