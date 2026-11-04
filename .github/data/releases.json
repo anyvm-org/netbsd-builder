@@ -234,6 +234,51 @@
       "shutdown": "/sbin/shutdown -p now",
       "desktop": false,
       "build": true
+    },
+    {
+      "tag": "11.1",
+      "release": "11.1",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,nfs,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "11.1-aarch64",
+      "release": "11.1",
+      "arch": "aarch64",
+      "sync": "rsync,scp,sshfs,nfs,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "11.1-riscv64",
+      "release": "11.1",
+      "arch": "riscv64",
+      "sync": "rsync,scp,sshfs,nfs,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "11.1-sparc64",
+      "release": "11.1",
+      "arch": "sparc64",
+      "sync": "scp,sshfs,nfs,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
+    },
+    {
+      "tag": "11.1-microvm",
+      "release": "11.1-microvm",
+      "arch": "x86_64",
+      "sync": "rsync,scp,sshfs,tar",
+      "shutdown": "/sbin/shutdown -p now",
+      "desktop": false,
+      "build": true
     }
   ]
 }
